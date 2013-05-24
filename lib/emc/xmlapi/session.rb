@@ -30,7 +30,6 @@ module EMC
 
         logout if @logged_in
 
-        # TODO: need to have global constant for login url
         # TODO: need to check @user and @pass for invalid chars
         response = @http_conn.post(URL_LOGIN,
             "user=#{@user}&password=#{@pass}&Login=Login",
@@ -75,6 +74,14 @@ module EMC
           #   * Set CelerraConnector-Ctl HTTP header with value as DISCONNECT
           #   * Perform POST to URL_MGMT
           #   * Check for HTTP 200 OK in response (can be ignored)
+          response = @http_conn.post(URL_MGMT, '',
+              'Content-Type'          => 'text/xml',
+              'CelerraConnector-Sess' => @celerra_session,
+              'CelerraConnector-Ctl'  => 'DISCONNECT')
+
+          if response.code_type != Net::HTTPOK
+            $log.warn { "Logout returned HTTP response #{response.code_type}" }
+          end
 
           @celerra_session = nil
         end
